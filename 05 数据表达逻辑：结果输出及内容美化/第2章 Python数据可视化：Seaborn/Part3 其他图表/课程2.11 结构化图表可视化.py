@@ -7,11 +7,13 @@ Created on Thu Oct 31 16:36:08 2019
 
 '''
 
-【课程2.11】结构化图标可视化
+【课程2.11】结构化图表可视化
 
 FacetGrid
 
+类似于matplotlib里面做子图，也类似于JointGrid,PairGrid
 '''
+
 
 import numpy as np
 import pandas as pd

@@ -61,6 +61,7 @@ sns.tsplot(time="timepoint", #时间数据，x轴
            condition="ROI", #分类
            data=gammas)
 
+'''热图：用在两个离散值的绘图，比如空间定位的时候'''
 #2.热图 -heatmap()
 #简单示例
 
@@ -70,7 +71,7 @@ df
 
 sns.heatmap(df, #加载数据
             vmin=0,vmax=1 #设置图例最大最小值
-            )
+            )  
 
 #2.热图 -heatmap()
 #参数设置
