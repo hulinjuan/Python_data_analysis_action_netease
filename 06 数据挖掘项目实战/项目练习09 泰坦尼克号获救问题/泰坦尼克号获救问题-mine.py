@@ -5,10 +5,15 @@ Created on Wed Oct 23 09:57:00 2019
 @author: lindsay.hu
 """
 
+#数据整理与分析
 import numpy as np
 import pandas as pd
+import random as rnd
+
+#可视化
 import matplotlib.pyplot as plt
 import seaborn as sns
+
 import os
 import time
 
@@ -16,8 +21,18 @@ import time
 import warnings
 warnings.filterwarnings('ignore')
 
+## machine learning
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC, LinearSVC
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.linear_model import Perceptron
+from sklearn.linear_model import SGDClassifier
+from sklearn.tree import DecisionTreeClassifier
+
 '''
-1.整体来看，存货比例如何？
+1.整体来看，存活比例如何？
 要求：
 ① 读取已知生存数据train.csv
 ② 查看已知存活数据中，存活比例如何？
@@ -160,6 +175,7 @@ average_fare.plot(yerr = std_fare,kind = 'bar',figsize = (15,4),grid = True)
 提示：
 ① 训练数据集中，性别改为数字表示 → 1代表男性，0代表女性
 '''
+'''
 # 数据清洗，提取训练字段
 knn_train = train_data[['Survived','Pclass','Sex','Age','Fare','family_size']].dropna()
 knn_train['Sex'][train_data['Sex'] == 'male'] = 1
@@ -169,6 +185,7 @@ test_data['family_size'] = test_data['Parch'] + test_data['SibSp'] + 1
 knn_test = test_data[['Pclass','Sex','Age','Fare','family_size']].dropna()
 knn_test['Sex'][test_data['Sex'] == 'male'] = 1
 knn_test['Sex'][test_data['Sex'] == 'female'] = 0
+
 from sklearn import neighbors
 
 knn = neighbors.KNeighborsClassifier()
@@ -177,3 +194,34 @@ knn.fit(knn_train[['Pclass','Sex','Age','Fare','family_size']],knn_train['Surviv
 knn_test['predict'] = knn.predict(knn_test)
 pre_survived = knn_test[knn_test['predict'] == 1].reset_index()
 del pre_survived['index']
+
+'''
+
+###############################################################
+#建模预测，输出结果
+knn_train = train_data[['PassengerId','Survived','Pclass','Sex','Fare','family_size']].dropna()
+knn_train['Sex'][train_data['Sex'] == 'male'] = 1
+knn_train['Sex'][train_data['Sex'] == 'female'] = 0
+
+#不丢失passengerid
+test_data['family_size'] = test_data['Parch'] + test_data['SibSp'] + 1
+knn_test = test_data[['PassengerId','Pclass','Sex','Fare','family_size']]
+knn_test['Sex'][test_data['Sex'] == 'male'] = 1
+knn_test['Sex'][test_data['Sex'] == 'female'] = 0
+knn_test['Fare'].fillna(0,inplace=True)
+
+from sklearn import neighbors
+
+knn = neighbors.KNeighborsClassifier()
+knn.fit(knn_train[['Pclass','Sex','Fare','family_size']],knn_train['Survived'])
+knn_train['predict'] = knn.predict(knn_train[['Pclass','Sex','Fare','family_size']])
+#accuracy评估
+print(knn_train['predict'],knn_train['Survived'])
+
+
+knn_test['predict'] = knn.predict(knn_test[['Pclass','Sex','Fare','family_size']])
+
+out_put = pd.DataFrame({'PassengerId': knn_test.PassengerId, 'Survived':  knn_test.predict})
+
+out_put.to_csv('my_submission.csv', index=False)
+print("Your submission was successfully saved!")
