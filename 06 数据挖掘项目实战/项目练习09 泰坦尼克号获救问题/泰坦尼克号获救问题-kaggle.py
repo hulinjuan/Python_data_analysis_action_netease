@@ -33,7 +33,7 @@ from sklearn.linear_model import SGDClassifier
 from sklearn.tree import DecisionTreeClassifier
 
 #获取数据
-os.chdir('C:\\Users\\lindsay.hu\\Desktop\\py\\pynet\\Titanic\\')
+os.chdir('E:\\learning\\program\\pycode\\Titanic\\')
 train_df = pd.read_csv('train.csv')
 test_df = pd.read_csv('test.csv')
 combine = [train_df,test_df]
@@ -231,3 +231,37 @@ train_df.loc[:,['Age*Class','Age','Pclass']].head(10)
 #完善补充分类特征的缺失值
 freq_port = train_df.Embarked.dropna().mode()[0]
 freq_port
+
+for dataset in combine:
+    dataset['Embarked'] = dataset['Embarked'].fillna(freq_port)
+
+train_df[['Embarked','Survived']].groupby(['Embarked'],as_index=False).mean().sort_values(by='Survived',ascending=False)
+
+for dataset in combine:
+    dataset['Embarked'] = dataset['Embarked'].map({'S':0,'C':1,'Q':2}).astype(int)
+train_df.head()
+
+#快速完善补充数值特征的缺失值
+test_df['Fare'].fillna(test_df['Fare'].dropna().median(),inplace=True)
+test_df.head()
+
+train_df['FareBand'] = pd.qcut(train_df['Fare'],4)
+train_df[['FareBand','Survived']].groupby(['FareBand'],as_index=False).mean().sort_values(by='FareBand',ascending=True)
+
+for dataset in combine:
+    dataset.loc[dataset['Fare'] <= 7.91,'Fare'] = 0
+    dataset.loc[(dataset['Fare'] > 7.9) & (dataset['Fare'] <= 14.454),'Fare'] = 1
+    dataset.loc[(dataset['Fare'] > 14.454) & (dataset['Fare'] <= 31),'Fare'] = 2
+    dataset.loc[dataset['Fare'] > 31,'Fare'] = 3
+    dataset['Fare'] = dataset['Fare'].astype(int)
+
+train_df =train_df.drop(['FareBand'],axis=1)
+combine = [train_df,test_df]
+
+train_df.head(10)
+    
+test_df.head(10)    
+
+'''建模、预测、解决问题'''
+
+    
