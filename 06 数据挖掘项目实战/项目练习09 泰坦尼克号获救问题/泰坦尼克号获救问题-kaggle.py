@@ -33,7 +33,8 @@ from sklearn.linear_model import SGDClassifier
 from sklearn.tree import DecisionTreeClassifier
 
 #获取数据
-os.chdir('E:\\learning\\program\\pycode\\Titanic\\')
+#os.chdir('E:\\learning\\program\\pycode\\Titanic\\')
+os.chdir('C:\\Users\\lindsay.hu\\Desktop\\py\\pynet\\Titanic\\')
 train_df = pd.read_csv('train.csv')
 test_df = pd.read_csv('test.csv')
 combine = [train_df,test_df]
@@ -264,4 +265,107 @@ test_df.head(10)
 
 '''建模、预测、解决问题'''
 
+x_train = train_df.drop('Survived',axis=1)  
+y_train = train_df['Survived']
+x_test = test_df.drop('PassengerId',axis=1).copy()
+x_train.shape,y_train.shape,x_test.shape
+
+#Logistic Regression
+
+logreg = LogisticRegression()
+logreg.fit(x_train,y_train)
+y_pred = logreg.predict(x_test)
+acc_log = round(logreg.score(x_train,y_train)*100,2)
+acc_log
+
+coeff_df = pd.DataFrame(train_df.columns.delete(0))
+coeff_df.columns = ['Feature']
+coeff_df['Correlation'] = pd.Series(logreg.coef_[0])
+coeff_df.sort_values(by='Correlation',ascending=False)
+
+#Support Vector Machines
+#训练后的score比LR好
+
+svc = SVC()
+svc.fit(x_train,y_train)
+y_pred = svc.predict(x_test)
+acc_svc = round(svc.score(x_train,y_train)*100,2)
+acc_svc
+
+#KNN
+#训练后的score比LR好,比SVC差
+
+knn = KNeighborsClassifier(n_neighbors = 3)
+knn.fit(x_train,y_train)
+y_pred = knn.predict(x_test)
+acc_knn = round(knn.score(x_train,y_train)*100,2)
+acc_knn
+
+#Gaussian Naive Bayes
+#目前为止的训练算法中，准确率最低
+
+gaussian = GaussianNB()
+gaussian.fit(x_train,y_train)
+y_pred = gaussian.predict(x_test)
+acc_gaussian = round(gaussian.score(x_train,y_train)*100,2)
+acc_gaussian
+
+# Perceptron
+
+perceptron = Perceptron()
+perceptron.fit(x_train,y_train)
+y_pred = perceptron.predict(x_test)
+acc_perceptron = round(perceptron.score(x_train, y_train) * 100, 2)
+acc_perceptron
+
+#liner_svc
+
+linear_svc = LinearSVC()
+linear_svc.fit(x_train,y_train)
+y_pred = linear_svc.predict(x_test)
+acc_linear_svc = round(linear_svc.score(x_train,y_train)*100,2)
+acc_linear_svc
+
+#sgd
+
+sgd = SGDClassifier()
+sgd.fit(x_train,y_train)
+y_pred = sgd.predict(x_test)
+acc_sgd = round(sgd.score(x_train,y_train)*100,2)
+acc_sgd
+
+#decision tree
+
+decision_tree = DecisionTreeClassifier()
+decision_tree.fit(x_train,y_train)
+y_pred = decision_tree.predict(x_test)
+acc_decision_tree = round(decision_tree.score(x_train,y_train)*100,2)
+acc_decision_tree 
+
+#Random Forest
+#目前为止，训练结果准确率最高，用这个模型输出来提交结果
+
+random_forest = RandomForestClassifier(n_estimators=100)
+random_forest.fit(x_train,y_train)
+y_pred = random_forest.predict(x_test)
+random_forest.score(x_train,y_train)
+acc_random_forest = round(random_forest.score(x_train,y_train)*100,2)
+acc_random_forest
+
+'''模型评估'''
+
+models = pd.DataFrame({ 'Model': ['Support Vector Machines', 'KNN', 
+                                  'Logistic Regression', 'Random Forest',
+                                  'Naive Bayes', 'Perceptron', 
+                                  'Stochastic Gradient Decent', 'Linear SVC', 
+                                  'Decision Tree'],
+                        'Score': [acc_svc, acc_knn, acc_log, 
+                                  acc_random_forest, acc_gaussian, acc_perceptron, 
+                                  acc_sgd, acc_linear_svc, acc_decision_tree]})
+models.sort_values(by='Score',ascending=False)
+
+submission = pd.DataFrame({
+        "PassengerId": test_df["PassengerId"],
+        "Survived": y_pred
+        })
     
