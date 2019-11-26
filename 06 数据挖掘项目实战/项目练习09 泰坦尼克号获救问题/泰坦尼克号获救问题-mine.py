@@ -120,22 +120,22 @@ plt.figure(figsize = (12,3))
 plt.subplot(141)
 plt.axis('equal')
 sibsp_df['Survived'].value_counts().plot.pie(labels = ['No Survived','Survived'],
-        autopct = '%.1f%%',colormap = 'Blues')
+        autopct = '%.1f%%',colormap = 'summer')
 
 plt.subplot(142)
 plt.axis('equal')
 no_sibsp_df['Survived'].value_counts().plot.pie(labels = ['No Survived','Survived'],
-        autopct = '%.1f%%',colormap = 'Blues')
+        autopct = '%.1f%%',colormap = 'summer')
 
 plt.subplot(143)
 plt.axis('equal')
 parch_df['Survived'].value_counts().plot.pie(labels = ['No Survived','Survived'],
-        autopct = '%.1f%%',colormap = 'Reds')
+        autopct = '%.1f%%',colormap = 'summer')
 
 plt.subplot(144)
 plt.axis('equal')
 no_parch_df['Survived'].value_counts().plot.pie(labels = ['No Survived','Survived'],
-        autopct = '%.1f%%',colormap = 'Reds')
+        autopct = '%.1f%%',colormap = 'summer')
 #print('有兄弟姐妹、父母子女的乘客存活率更大')
 
 #亲戚多少与存活与否的关系
@@ -199,9 +199,14 @@ del pre_survived['index']
 
 ###############################################################
 #建模预测，输出结果
+
+
 knn_train = train_data[['PassengerId','Survived','Pclass','Sex','Fare','family_size']].dropna()
 knn_train['Sex'][train_data['Sex'] == 'male'] = 1
 knn_train['Sex'][train_data['Sex'] == 'female'] = 0
+
+x_train =  knn_train[['Pclass','Sex','Fare','family_size']]
+y_train = knn_train['Survived']
 
 #不丢失passengerid
 test_data['family_size'] = test_data['Parch'] + test_data['SibSp'] + 1
@@ -210,18 +215,18 @@ knn_test['Sex'][test_data['Sex'] == 'male'] = 1
 knn_test['Sex'][test_data['Sex'] == 'female'] = 0
 knn_test['Fare'].fillna(0,inplace=True)
 
+x_test = knn_test[['Pclass','Sex','Fare','family_size']]
+
+
 from sklearn import neighbors
 
 knn = neighbors.KNeighborsClassifier()
-knn.fit(knn_train[['Pclass','Sex','Fare','family_size']],knn_train['Survived'])
-knn_train['predict'] = knn.predict(knn_train[['Pclass','Sex','Fare','family_size']])
+knn.fit(x_train,y_train)
+y_pred = knn.predict(x_test)
 #accuracy评估
-print(knn_train['predict'],knn_train['Survived'])
+print(round(100*knn.score(x_train,y_train)),2)
 
-
-knn_test['predict'] = knn.predict(knn_test[['Pclass','Sex','Fare','family_size']])
-
-out_put = pd.DataFrame({'PassengerId': knn_test.PassengerId, 'Survived':  knn_test.predict})
+out_put = pd.DataFrame({'PassengerId': knn_test.PassengerId, 'Survived':  y_pred})
 
 out_put.to_csv('my_submission.csv', index=False)
 print("Your submission was successfully saved!")
